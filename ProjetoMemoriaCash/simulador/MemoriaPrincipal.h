@@ -17,7 +17,7 @@ public:
 
     int ler(unsigned int endereco) override;
     void escrever(unsigned int endereco, int dado) override;
-    void imprimirEstatisticas() override;
+    void imprimirEstatistica() override;
 
 
 
@@ -25,8 +25,8 @@ public:
 //  esses são os atributos da classe
     private:
         std::map<unsigned int, int>dados_; // map --> "como se fosse um dicionário" armazena [chave]: valor --> representar os endereços e oque esta armazenado
-        int leituras_ = 0;
-        int escritas_ = 0;
+        int leitura_ = 0;
+        int escrita_ = 0;
 };
 
 #endif

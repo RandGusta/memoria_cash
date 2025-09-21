@@ -12,6 +12,6 @@ int main() {
     cout << "Endereco 20 = " << ram.ler(20) << endl;
     cout << "Endereco 30 (nao escrito) = " << ram.ler(30) << endl;
 
-    ram.imprimirEstatisticas();
+    ram.imprimirEstatistica();
     return 0;
 }
