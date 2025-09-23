@@ -3,8 +3,8 @@
 #include "Memoria.h"
 #include <iostream>
 
-MemoriaPrincipal::MemoriaPrincipal(const std::string& nome, int latencia) // letencia --> ciclo de clocks que um acesso aquela memoria demora
-    : Memoria(nome, latencia) {                                            // a latencia será somada toda vez que consultarmos um n nivel de hierarquia
+MemoriaPrincipal::MemoriaPrincipal(const std::string& nome, int latencia)
+    : Memoria(nome, latencia) {                                            
 }
 
 int MemoriaPrincipal::ler(unsigned int endereco) {

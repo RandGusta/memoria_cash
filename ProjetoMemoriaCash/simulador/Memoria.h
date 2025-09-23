@@ -11,6 +11,8 @@ class Memoria{
     Memoria(const std::string& nome, int latencia) : nome_(nome), latencia_(latencia){} // '&' a função acessa a string diretamente no local da memória
                                                                                         // não cria uma copia
                                                                                         // '_' seria tipo o 'this' em Java
+                                                                                        // letencia --> ciclo de clocks que um acesso aquela memoria demora
+                                                                                        // a latencia será somada toda vez que consultarmos um nivel de hierarquia
     
     virtual  ~Memoria(){} // Destrutor virtual, importante para o polimorfismo e herança em C++
 

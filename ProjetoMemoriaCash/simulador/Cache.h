@@ -15,15 +15,15 @@ struct LinhaCache {
 };
 
 
-enum TipoEscrita {
+enum PoliticaDeEscrita {
     WRITE_THROUGH,
-    WIRTE_BACK
+    WRITE_BACK
 };
 
 class Cache : public Memoria {
-    public:
-        Cache(const std::string& nome, int latencia, int associatividade,
-        int tamanhoLinho, int tamanhoConjunto, TipoEscrita tipoEscrita, Memoria* proximoNivel);
+public:
+    Cache(const std::string& nome, int latencia, int associatividade,
+          int tamanhoConjuntoAssociativo, PoliticaDeEscrita politicaDeEscrita, Memoria* proximoNivel);
         
         virtual ~Cache();
 
@@ -34,19 +34,13 @@ class Cache : public Memoria {
 
         private:
             int associatividade_;
-            int tamanhoLinha_;
-            int tamanhoConjunto_;
-            TipoEscrita tipoEscrita_;
+            int tamanhoLinha_; // valor fixo atribuido no .cpp --> perguntar para o Eduardo
+            int tamanhoConjuntoAssociativo_;
+            PoliticaDeEscrita politicaDeEscrita_;
             Memoria* proximoNivel_;
-
-
-
             std::vector<std::vector<LinhaCache>> cache_;
             std:: vector<std::list<unsigned int>> lista_LRU; // LRU --> usada menos recente --> politica de substituição 
-                                                            // oque foi usado a menos tempo sai para um novo dado entrar
-
-            
-
+                                                            // oque foi usado a MAIS tempo sai para um novo dado entrar
             int leitura_ = 0;
             int escrita_ = 0;
             int acerto_ = 0; // hit
