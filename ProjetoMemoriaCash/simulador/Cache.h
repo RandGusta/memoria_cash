@@ -47,10 +47,6 @@ public:
             int erro_ = 0; // miss
 
 
-            void pegarCampoEndereco(unsigned int endereco, unsigned int& tag, unsigned int& conjunto, unsigned int& offset);
-            bool buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache);
-            void atualizarLRU(unsigned int conjunto, unsigned int tag);
-            void inserirNaCache(unsigned int endereco, int dado);
         
 };
 
