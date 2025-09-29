@@ -34,7 +34,7 @@ public:
 
         private:
             int associatividade_;
-            int tamanhoLinha_; // valor fixo atribuido no  --> perguntar para o Eduardo
+            int tamanhoLinha_; // valor fixo atribuido no construtor --> perguntar para o Eduardo
             int tamanhoConjuntoAssociativo_;
             PoliticaDeEscrita politicaDeEscrita_;
             Memoria* proximoNivel_; // para guardar um endereço de um objeto do tipo memoória ou que herde de memória 
