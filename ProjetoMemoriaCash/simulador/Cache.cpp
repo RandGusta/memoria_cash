@@ -29,15 +29,15 @@ Cache::Cache(const std::string& nome, int latencia, int associatividade,
   }
 }
 
-Cache_:~Cache(){}
+Cache::~Cache(){}
 
 int Cache:: ler(unsigned int endereco){
   leitura_++;
   LinhaCache* linha = nullptr; // cria um ponteiro que aponta nulo
 
   if(buscarNaCache(endereco, linha)){  // hit --> dado já esta na cache 
-    acerto++;
-    return linha->dados[]; // acessa o campo em dados apontado '->' por linha //CALCULAR OFFSET
+    acerto_++;
+    return linha->dados[0]; // acessa o campo em dados apontado '->' por linha //CALCULAR OFFSET
 
   } else{  // miss
 
@@ -47,6 +47,7 @@ int Cache:: ler(unsigned int endereco){
     return dado;
 
   }
+}
 
 
 void Cache::escrever(unsigned int endereco, int dado) {
@@ -55,20 +56,27 @@ void Cache::escrever(unsigned int endereco, int dado) {
 
     if (buscarNaCache(endereco, linha)) { // hit 
         acerto_++;
-        linha->dados[0] = static_cast<char>(dado);
+        linha->dados[0] = static_cast<char>(dado); // casting --> int para char
 
-        if (politicaDeEscrita_ == WRITE_THROUGH) {
-            proximoNivel_->escrever(endereco, dado);
+        if (politicaDeEscrita_ == WRITE_THROUGH) { // analisa a politica de escrita 
+            proximoNivel_->escrever(endereco, dado); 
+
         } else if (politicaDeEscrita_ == WRITE_BACK) {
             linha->suja = true;
         }
-    } else {
+    } else { // miss 
         erro_++;
         if (politicaDeEscrita_ == WRITE_THROUGH) {
             proximoNivel_->escrever(endereco, dado);
+
         } else if (politicaDeEscrita_ == WRITE_BACK) {
             inserirNaCache(endereco, dado);
         }
     }
-}
 
+// metodo buscarNaCache( int endereco, LinhaCache*& linhaCache) 
+//        se encontrar vai apontar para a linha correspondente 
+
+
+// metodo inserirNaCache(int endereco, int dado)
+//        

@@ -11,7 +11,7 @@ struct LinhaCache {
     bool valida; 
     bool suja; 
     unsigned int tag; // os bytes mais significativos colocar aqui 
-    std:: vector<char> dados;
+    std:: vector<char> dados; // char --> tipo de mais baixo nivel que representa 1 byte é o char 
 };
 
 
@@ -37,7 +37,7 @@ public:
             int tamanhoLinha_; // valor fixo atribuido no construtor --> perguntar para o Eduardo
             int tamanhoConjuntoAssociativo_;
             PoliticaDeEscrita politicaDeEscrita_;
-            Memoria* proximoNivel_; // para guardar um endereço de um objeto do tipo memoória ou que herde de memória 
+            Memoria* proximoNivel_; // para guardar um endereço de um objeto do tipo memória ou que herde de memória 
             std::vector<std::vector<LinhaCache>> cache_; // vetor de vetores --> primeiro indice = conjunto da cache segundo indice = linha 
                                                         // conjunto 0 --> [linha0, linha1, ...]
 
