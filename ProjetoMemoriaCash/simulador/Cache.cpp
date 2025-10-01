@@ -76,7 +76,19 @@ void Cache::escrever(unsigned int endereco, int dado) {
 
 // metodo buscarNaCache( int endereco, LinhaCache*& linhaCache) 
 //        se encontrar vai apontar para a linha correspondente 
+bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache) {
+  unsigned int tag, conjunto, offset;
+  pegarCampoEndereco(endereco, tag, conjunto, offset);
 
+  for(auto& linha : cache_[conjunto]) {
+    if(linha.valida && linha.tag == tag) {
+      linhaCache = &linha;
+      atualizarLRU(conjunto,tag);
+      return true;
+    }
+  }
+  return false;
+}
 
 // metodo inserirNaCache(int endereco, int dado)
 //        
