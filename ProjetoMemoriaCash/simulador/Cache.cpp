@@ -109,3 +109,4 @@ void Cache::inserirNaCache(unsigned int endereco, int dado) {
             return;
         }
     }
+}
