@@ -91,4 +91,6 @@ bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache) {
 }
 
 // metodo inserirNaCache(int endereco, int dado)
-//        
+void Cache::inserirNaCache(unsigned int endereco, int dado) {
+  unsigned int tag, conjunto, offset;
+}
