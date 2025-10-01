@@ -92,5 +92,20 @@ bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache) {
 
 // metodo inserirNaCache(int endereco, int dado)
 void Cache::inserirNaCache(unsigned int endereco, int dado) {
-  unsigned int tag, conjunto, offset;
-}
+    unsigned int tag, conjunto, offset;
+    pegarCampoEndereco(endereco, tag, conjunto, offset);
+
+    auto& linhas = cache_[conjunto];
+    auto& lista = lista_LRU[conjunto];
+
+    // procura espaço livre
+    for (auto& linha : linhas) {
+        if (!linha.valida) {
+            linha.valida = true;
+            linha.suja = false;
+            linha.tag = tag;
+            linha.dados[0] = static_cast<char>(dado);
+            atualizarLRU(conjunto, tag);
+            return;
+        }
+    }
