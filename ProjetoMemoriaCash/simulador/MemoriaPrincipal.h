@@ -24,7 +24,7 @@ public:
 
 //  esses são atributos da classe
     private:
-        std::map<unsigned int, int>dados_; // map --> "como se fosse um dicionário" armazena [chave]: valor --> representar os endereços e oque esta armazenado
+ //       std::map<unsigned int, int>dados_; // map --> "como se fosse um dicionário" armazena [chave]: valor --> representar os endereços e oque esta armazenado
         int leitura_ = 0;
         int escrita_ = 0;
 };

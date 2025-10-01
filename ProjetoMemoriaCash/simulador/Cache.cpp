@@ -3,11 +3,11 @@
 #include <iomanip>
 
 
-Cache::Cache(const std::string& nome, int latencia, int associatividade,
+Cache::Cache(const std::string& nome, int latencia, int associatividade, int tamanhoLinha,
              int tamanhoConjuntoAssociativo, PoliticaDeEscrita politicaDeEscrita, Memoria* proximoNivel)
     : Memoria(nome, latencia),
       associatividade_(associatividade),
-      tamanhoLinha_(32), // valor fixo (32 bytes) para facilitar nossa vida o calculo da tag, conjunto, etc... por ser potência de 2 --> documentação do trabalho Perguntar para o eduardo
+      tamanhoLinha_(tamanhoLinha), // valor fixo (32 bytes) para facilitar nossa vida o calculo da tag, conjunto, etc... por ser potência de 2 --> documentação do trabalho Perguntar para o eduardo
       tamanhoConjuntoAssociativo_(tamanhoConjuntoAssociativo),
       politicaDeEscrita_(politicaDeEscrita),
       proximoNivel_(proximoNivel) 

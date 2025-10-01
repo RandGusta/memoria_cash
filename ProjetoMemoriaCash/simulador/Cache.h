@@ -11,7 +11,7 @@ struct LinhaCache {
     bool valida; 
     bool suja; 
     unsigned int tag; // os bytes mais significativos colocar aqui 
-    std:: vector<char> dados; // char --> tipo de mais baixo nivel que representa 1 byte é o char 
+   // std:: vector<char> dados; // char --> tipo de mais baixo nivel que representa 1 byte é o char em C
 };
 
 
@@ -22,7 +22,7 @@ enum PoliticaDeEscrita {
 
 class Cache : public Memoria {
 public:
-    Cache(const std::string& nome, int latencia, int associatividade,
+    Cache(const std::string& nome, int latencia, int associatividade, int tamanhoLinha,
           int tamanhoConjuntoAssociativo, PoliticaDeEscrita politicaDeEscrita, Memoria* proximoNivel);
         
         virtual ~Cache();
