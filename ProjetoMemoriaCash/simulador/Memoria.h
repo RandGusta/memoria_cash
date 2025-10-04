@@ -18,7 +18,7 @@ class Memoria{
 
 
     virtual int ler(unsigned int endereco) = 0; 
-    virtual void escrever(unsigned int endereco, int dado) = 0;
+    virtual void escrever(unsigned int endereco) = 0;
     virtual void imprimirEstatistica() = 0;
 
     protected:

@@ -10,8 +10,8 @@
 struct LinhaCache {
     bool valida; 
     bool suja; 
-    unsigned int tag; // os bytes mais significativos colocar aqui 
-   // std:: vector<char> dados; // char --> tipo de mais baixo nivel que representa 1 byte é o char em C
+    unsigned int tag; // IDENTIFICA O BLOCO os bytes mais significativos colocar aqui 
+   //std:: vector<char> dados; // char --> tipo de mais baixo nivel que representa 1 byte é o char em C
 };
 
 
@@ -28,8 +28,9 @@ public:
         virtual ~Cache();
 
         int ler(unsigned int endereco) override;
-        void escrever(unsigned int endereco, int dado) override;
+        void escrever(unsigned int endereco) override;
         void imprimirEstatistica() override;
+        
 
 
         private:
@@ -52,6 +53,12 @@ public:
             int escrita_ = 0;
             int acerto_ = 0; // hit --> esta na cache
             int erro_ = 0; // miss --> não esta na cache --> buscar o proximo nível da memória
+
+            bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache);
+            void Cache::inserirNaCache(unsigned int endereco);
+            void Cache::atualizarLRU(unsigned int conjunto, unsigned int tag);
+            void Cache::pegarCampoEndereco(unsigned int endereco, unsigned int& tag, unsigned int& conjunto, unsigned int& offset);
+
 
 
          

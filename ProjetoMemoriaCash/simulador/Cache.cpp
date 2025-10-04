@@ -2,111 +2,183 @@
 #include <iostream>
 #include <iomanip>
 
-
 Cache::Cache(const std::string& nome, int latencia, int associatividade, int tamanhoLinha,
              int tamanhoConjuntoAssociativo, PoliticaDeEscrita politicaDeEscrita, Memoria* proximoNivel)
     : Memoria(nome, latencia),
       associatividade_(associatividade),
-      tamanhoLinha_(tamanhoLinha), // valor fixo (32 bytes) para facilitar nossa vida o calculo da tag, conjunto, etc... por ser potência de 2 --> documentação do trabalho Perguntar para o eduardo
+      tamanhoLinha_(tamanhoLinha),
       tamanhoConjuntoAssociativo_(tamanhoConjuntoAssociativo),
       politicaDeEscrita_(politicaDeEscrita),
-      proximoNivel_(proximoNivel) 
-
+      proximoNivel_(proximoNivel)
 {
 
-  cache_.resize(tamanhoConjuntoAssociativo_); // espaço para cada conjunto --> criando so a quantidade de conjuntos --> o vetor externo
-  lista_LRU.resize(tamanhoConjuntoAssociativo_); // lista para cada conjunto
+    cache_.resize(tamanhoConjuntoAssociativo_); // espaço para cada conjunto --> criando so a quantidade de conjuntos --> o vetor externo
+    lista_LRU.resize(tamanhoConjuntoAssociativo_);  // lista para cada conjunto
 
-  for(int i=0; i<tamanhoConjuntoAssociativo_; i++){
-    cache_[i].resize(associatividade_); // criando vetor interno --> linhas
-    for(int j=0; i<associatividade_; j++){
-      cache_[i][j].valida = false;
-      cache_[i][j].suja = false;
-      cache_[i][j].tag = 0;
-      cache_[i][j].dados.resize(tamanhoLinha_, 0); // bytes da linha --> espaço reservado, nesse caso (32, 0) --> começa no zero
+    for (int i = 0; i < tamanhoConjuntoAssociativo_; i++) {  
+        cache_[i].resize(associatividade_);// criando vetor interno --> linhas
 
+        for (int j = 0; j < associatividade_; j++) {
+            cache_[i][j].valida = false;
+            cache_[i][j].suja = false;
+            cache_[i][j].tag = 0;
+            // linhaCache->dados removido --> depois de conversar com o professor 
+        }
     }
-  }
 }
 
-Cache::~Cache(){}
+Cache::~Cache() {}
 
-int Cache:: ler(unsigned int endereco){
-  leitura_++;
-  LinhaCache* linha = nullptr; // cria um ponteiro que aponta nulo
+// Metodos herdados ___________________________________
+int Cache::ler(unsigned int endereco) {
+    leitura_++;
+    LinhaCache* linha = nullptr; // ponteiro que aponta para null
+    // cada nivel soma sua própria latência
+    int ciclos = latencia_; // a latencia do nivel sempre conta mesmo com hit
 
-  if(buscarNaCache(endereco, linha)){  // hit --> dado já esta na cache 
-    acerto_++;
-    return linha->dados[0]; // acessa o campo em dados apontado '->' por linha //CALCULAR OFFSET
-
-  } else{  // miss
-
-    erro_++;
-    int dado = proximoNivel_->ler(endereco);
-    inserirNaCache(endereco, dado);
-    return dado;
-
-  }
-}
-
-
-void Cache::escrever(unsigned int endereco, int dado) {
-    escrita_++;
-    LinhaCache* linha = nullptr; // ponteiro null
-
-    if (buscarNaCache(endereco, linha)) { // hit 
+    if (buscarNaCache(endereco, linha)) { //hit
         acerto_++;
-        linha->dados[0] = static_cast<char>(dado); // casting --> int para char
+        return ciclos; // em hit retorna apenas a latencia do nivel que estava pois foi encontrado
+    } else { //miss
+        erro_++;
+        int tempoProximoNivel = proximoNivel_->ler(endereco); // retornando a latencia do(s) proximo(s) nivel(is)
+        inserirNaCache(endereco);
+        return ciclos + tempoProximoNivel; // soma a latência do nivel atual e do proximo 
+    }
+}
 
-        if (politicaDeEscrita_ == WRITE_THROUGH) { // analisa a politica de escrita 
-            proximoNivel_->escrever(endereco, dado); 
 
-        } else if (politicaDeEscrita_ == WRITE_BACK) {
+void Cache::escrever(unsigned int endereco) {
+    escrita_++;
+    LinhaCache* linha = nullptr;
+
+    if (buscarNaCache(endereco, linha)) { //hit
+        acerto_++;
+        if (politicaDeEscrita_ == WRITE_THROUGH) { // imediatamente no proximo nivel --> não deixa a linha suja
+            proximoNivel_->escrever(endereco);
+        } 
+        else if (politicaDeEscrita_ == WRITE_BACK) { // marca a linha como suja
             linha->suja = true;
         }
-    } else { // miss 
+    } 
+    else { //miss
         erro_++;
-        if (politicaDeEscrita_ == WRITE_THROUGH) {
-            proximoNivel_->escrever(endereco, dado);
 
-        } else if (politicaDeEscrita_ == WRITE_BACK) {
-            inserirNaCache(endereco, dado);
+        if (politicaDeEscrita_ == WRITE_THROUGH) {
+            proximoNivel_->escrever(endereco);
+        } 
+        else if (politicaDeEscrita_ == WRITE_BACK) { 
+            inserirNaCache(endereco);  //carrega bloco da cache
+            unsigned int tag, conjunto, offset;
+            pegarCampoEndereco(endereco, tag, conjunto, offset); // procura a linah e marca como suja
+            for (auto& linhaC : cache_[conjunto]) {
+                if (linhaC.valida && linhaC.tag == tag) {
+                    linhaC.suja = true;
+                    break;
+                }
+            }
         }
     }
-
-// metodo buscarNaCache( int endereco, LinhaCache*& linhaCache) 
-//        se encontrar vai apontar para a linha correspondente 
-bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache) {
-  unsigned int tag, conjunto, offset;
-  pegarCampoEndereco(endereco, tag, conjunto, offset);
-
-  for(auto& linha : cache_[conjunto]) {
-    if(linha.valida && linha.tag == tag) {
-      linhaCache = &linha;
-      atualizarLRU(conjunto,tag);
-      return true;
-    }
-  }
-  return false;
 }
 
-// metodo inserirNaCache(int endereco, int dado)
-void Cache::inserirNaCache(unsigned int endereco, int dado) {
+
+// Metodos especificos ____________________________________________________
+
+bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache) {
+    unsigned int tag, conjunto, offset;
+    pegarCampoEndereco(endereco, tag, conjunto, offset);
+
+    for (auto& linha : cache_[conjunto]) { // itera sobre todas as linhas do conjunto
+        if (linha.valida && linha.tag == tag) { // verifica se tag bate
+            linhaCache = &linha;
+            atualizarLRU(conjunto, tag); // agora essa linha é a mais recente
+            return true;
+        }
+    }
+    return false;
+}
+
+
+void Cache::inserirNaCache(unsigned int endereco) {
     unsigned int tag, conjunto, offset;
     pegarCampoEndereco(endereco, tag, conjunto, offset);
 
     auto& linhas = cache_[conjunto];
     auto& lista = lista_LRU[conjunto];
 
-    // procura espaço livre
+
     for (auto& linha : linhas) {
-        if (!linha.valida) {
+        if (!linha.valida) { // conjunto ainda não cheio 
             linha.valida = true;
             linha.suja = false;
             linha.tag = tag;
-            linha.dados[0] = static_cast<char>(dado);
             atualizarLRU(conjunto, tag);
             return;
         }
     }
+
+    unsigned int tagRemovida = lista.back(); //pega a tag menos usada a LRU 
+    lista.pop_back(); // remove da lista 
+
+    for (auto& linha : linhas) {
+        if (linha.tag == tagRemovida) {
+            // Se writeBack e estava suja --> escreve no próximo nível
+            if (politicaDeEscrita_ == WRITE_BACK && linha.suja) {
+                proximoNivel_->escrever(endereco); // simplificação
+            }
+
+            // Substitui linha
+            linha.valida = true;
+            linha.suja = false;
+            linha.tag = tag;
+            atualizarLRU(conjunto, tag);
+            return;
+        }
+    }
+    
+}
+
+
+// atualiza a lista LRU do conjunto: mantemos o elemento MAIS-RECENTE no front
+void Cache::atualizarLRU(unsigned int conjunto, unsigned int tag) {
+    auto& lista = lista_LRU[conjunto];
+
+    // remove ocorrência anterior da tag (se existir)
+    for (auto it = lista.begin(); it != lista.end(); ++it) {
+        if (*it == tag) { 
+            lista.erase(it);
+            break;
+        }
+    }
+
+    // coloca a tag como MAIS-RECENTE (front)
+    lista.push_front(tag);
+
+    // segurança: não deixar a lista maior que a associatividade
+    while (lista.size() > static_cast<size_t>(associatividade_)) {
+        lista.pop_back();
+    }
+}
+
+
+void Cache::pegarCampoEndereco(unsigned int endereco, 
+  unsigned int& tag, unsigned int& conjunto, unsigned int& offset) {
+ 
+    unsigned int offsetBits = 0; // off set vai ser log(tamanhoLinha_) na base 2
+    unsigned int tmp = static_cast<unsigned int>(tamanhoLinha_); // tmp --> tamnho da linha
+    while (tmp > 1) { tmp >>= 1; ++offsetBits; } // dividindo tmp 2 e movimentando os bits para a direita
+
+    unsigned int conjuntoBits = 0; // tbm é log na base 2
+    tmp = static_cast<unsigned int>(tamanhoConjuntoAssociativo_);
+    while (tmp > 1) { tmp >>= 1; ++conjuntoBits; }
+
+      // [ TAG ............... ][ CONJUNTO ][ OFFSET ]
+      //     resto               3 bits    4 bits
+
+    
+    unsigned int offsetMask = (offsetBits == 0) ? 0u : ((1u << offsetBits) - 1u);
+    unsigned int conjuntoMask = (conjuntoBits == 0) ? 0u : ((1u << conjuntoBits) - 1u);
+    offset = endereco & offsetMask;
+    conjunto = (offsetBits == 0) ? 0u : ((endereco >> offsetBits) & conjuntoMask);
+    tag = endereco >> (offsetBits + conjuntoBits);
 }

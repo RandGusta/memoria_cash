@@ -9,18 +9,13 @@ MemoriaPrincipal::MemoriaPrincipal(const std::string& nome, int latencia)
 
 int MemoriaPrincipal::ler(unsigned int endereco) {
     leitura_++;                                  // somando a cada chamada 
-    if(dados_.count(endereco)){
-        return dados_[endereco];
+    return latencia_;
 
-    } else {
-        return 0; 
-    }
+
 }
 
-void MemoriaPrincipal::escrever(unsigned int endereco, int dado) {
+void MemoriaPrincipal::escrever(unsigned int endereco) {
     escrita_++;
-    dados_[endereco] = dado;
-   
 }
 
 void MemoriaPrincipal::imprimirEstatistica() {

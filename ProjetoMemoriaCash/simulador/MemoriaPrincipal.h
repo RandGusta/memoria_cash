@@ -16,7 +16,7 @@ public:
     MemoriaPrincipal(const std::string& nome, int latencia);
 
     int ler(unsigned int endereco) override;
-    void escrever(unsigned int endereco, int dado) override;
+    void escrever(unsigned int endereco) override;
     void imprimirEstatistica() override;
 
 
