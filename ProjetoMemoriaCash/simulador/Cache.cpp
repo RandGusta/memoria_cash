@@ -29,7 +29,7 @@ Cache::Cache(const std::string& nome, int latencia, int associatividade, int tam
 
 Cache::~Cache() {}
 
-// Metodos herdados ___________________________________
+// Metodos herdados _____________
 int Cache::ler(unsigned int endereco) {
     leitura_++;
     LinhaCache* linha = nullptr; // ponteiro que aponta para null
@@ -82,7 +82,7 @@ void Cache::escrever(unsigned int endereco) {
 }
 
 
-// Metodos especificos ____________________________________________________
+// Metodos especificos __________________
 
 bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache) {
     unsigned int tag, conjunto, offset;
@@ -98,6 +98,24 @@ bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache) {
     return false;
 }
 
+
+// tentando buscar o endereço anterior para o metodo inserirNaCache
+unsigned int Cache::reconstruirEndereco(unsigned int tag, unsigned int conjunto){
+     unsigned int offsetBits = 0;
+    unsigned int tmp = static_cast<unsigned int>(tamanhoLinha_);
+    while (tmp > 1) { tmp >>= 1; ++offsetBits; }
+
+    unsigned int conjuntoBits = 0;
+    tmp = static_cast<unsigned int>(tamanhoConjuntoAssociativo_);
+    while (tmp > 1) { tmp >>= 1; ++conjuntoBits; }
+
+    // forrmula da reconstrução:
+    // endereço = (TAG << (bitsConjunto + bitsOffset)) | (CONJUNTO << bitsOffset)
+    unsigned int enderecoBase = (tag << (conjuntoBits + offsetBits)) | (conjunto << offsetBits);
+
+    return enderecoBase;
+
+}
 
 void Cache::inserirNaCache(unsigned int endereco) {
     unsigned int tag, conjunto, offset;
@@ -124,7 +142,9 @@ void Cache::inserirNaCache(unsigned int endereco) {
         if (linha.tag == tagRemovida) {
             // Se writeBack e estava suja --> escreve no próximo nível
             if (politicaDeEscrita_ == WRITE_BACK && linha.suja) {
-                proximoNivel_->escrever(endereco); // simplificação
+                //proximoNivel_->escrever(endereco); // errado --> endereço atual --> precisamos do do bloco antigo para guardar no proximo nivel 
+                unsigned int enderecoAntigo = reconstruirEndereco(linha.tag, conjunto);
+                proximoNivel_->escrever(enderecoAntigo);
             }
 
             // Substitui linha
@@ -154,7 +174,7 @@ void Cache::atualizarLRU(unsigned int conjunto, unsigned int tag) {
     // coloca a tag como MAIS-RECENTE (front)
     lista.push_front(tag);
 
-    // segurança: não deixar a lista maior que a associatividade
+    // segurança --> não deixar a lista maior que a associatividade
     while (lista.size() > static_cast<size_t>(associatividade_)) {
         lista.pop_back();
     }
@@ -166,19 +186,40 @@ void Cache::pegarCampoEndereco(unsigned int endereco,
  
     unsigned int offsetBits = 0; // off set vai ser log(tamanhoLinha_) na base 2
     unsigned int tmp = static_cast<unsigned int>(tamanhoLinha_); // tmp --> tamnho da linha
-    while (tmp > 1) { tmp >>= 1; ++offsetBits; } // dividindo tmp 2 e movimentando os bits para a direita
+    while (tmp > 1) { tmp >>= 1; ++offsetBits; } // dividindo tmp 2 --> movimentando os bits para a direita
 
     unsigned int conjuntoBits = 0; // tbm é log na base 2
     tmp = static_cast<unsigned int>(tamanhoConjuntoAssociativo_);
     while (tmp > 1) { tmp >>= 1; ++conjuntoBits; }
-
-      // [ TAG ............... ][ CONJUNTO ][ OFFSET ]
-      //     resto               3 bits    4 bits
+        //       resto               3 bits    4 bits
+        // [ TAG ............... ][ CONJUNTO ][ OFFSET ]
+        //    qual bloco           conj. linha  byte dentro da linha
 
     
+    
+        // mascara de bits --> extraindo o campo off set do endereco
     unsigned int offsetMask = (offsetBits == 0) ? 0u : ((1u << offsetBits) - 1u);
+        // mascara tbm --> extraindo conjunto
     unsigned int conjuntoMask = (conjuntoBits == 0) ? 0u : ((1u << conjuntoBits) - 1u);
+
+        // isolando o offset 
     offset = endereco & offsetMask;
+
+        // isolando o offset --> retirando os bits menos significativos 
     conjunto = (offsetBits == 0) ? 0u : ((endereco >> offsetBits) & conjuntoMask);
+
+        // sobrou a tag 
     tag = endereco >> (offsetBits + conjuntoBits);
+}
+
+
+void Cache::imprimirEstatistica() {
+    std::cout << "\n[" << nome_ << "] Estatísticas:" << std::endl;
+    std::cout << " Leituras: " << leitura_ << std::endl;
+    std::cout << " Escritas: " << escrita_ << std::endl;
+    std::cout << " Acertos (HITs): " << acerto_ << std::endl;
+    std::cout << " Erros (MISSes): " << erro_ << std::endl;
+    double taxaAcerto = (leitura_ + escrita_) > 0 ?
+                        (static_cast<double>(acerto_) / (leitura_ + escrita_)) * 100.0 : 0.0;
+    std::cout << " Taxa de acerto: " << taxaAcerto << "%" << std::endl;
 }
