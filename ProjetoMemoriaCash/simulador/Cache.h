@@ -1,4 +1,3 @@
-
 #ifndef CACHE_H
 #define CACHE_H
 #include "Memoria.h"
@@ -30,7 +29,6 @@ public:
         int ler(unsigned int endereco) override;
         void escrever(unsigned int endereco) override;
         void imprimirEstatistica() override;
-        
 
 
         private:
@@ -54,11 +52,12 @@ public:
             int acerto_ = 0; // hit --> esta na cache
             int erro_ = 0; // miss --> não esta na cache --> buscar o proximo nível da memória
 
-            bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache);
-            void Cache::inserirNaCache(unsigned int endereco);
-            void Cache::atualizarLRU(unsigned int conjunto, unsigned int tag);
-            void Cache::pegarCampoEndereco(unsigned int endereco, unsigned int& tag, unsigned int& conjunto, unsigned int& offset);
-
+            bool buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache);
+            void inserirNaCache(unsigned int endereco);
+            void atualizarLRU(unsigned int conjunto, unsigned int tag);
+            void pegarCampoEndereco(unsigned int endereco, unsigned int& tag, unsigned int& conjunto, unsigned int& offset);
+            unsigned int reconstruirEndereco(unsigned int tag, unsigned int conjunto);
+           
 
 
          
