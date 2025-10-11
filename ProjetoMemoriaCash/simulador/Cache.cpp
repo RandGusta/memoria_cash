@@ -124,7 +124,7 @@ void Cache::inserirNaCache(unsigned int endereco) {
         if (linha.tag == tagRemovida) {
             // Se writeBack e estava suja --> escreve no próximo nível
             if (politicaDeEscrita_ == WRITE_BACK && linha.suja) {
-                proximoNivel_->escrever(endereco); // simplificação
+                proximoNivel_->escrever(endereco); // --> deveria calcular o endereço exato correspondente no próximo nível
             }
 
             // Substitui linha
@@ -154,7 +154,7 @@ void Cache::atualizarLRU(unsigned int conjunto, unsigned int tag) {
     // coloca a tag como MAIS-RECENTE (front)
     lista.push_front(tag);
 
-    // segurança: não deixar a lista maior que a associatividade
+    // segurança --> não deixar a lista maior que a associatividade
     while (lista.size() > static_cast<size_t>(associatividade_)) {
         lista.pop_back();
     }
@@ -166,19 +166,28 @@ void Cache::pegarCampoEndereco(unsigned int endereco,
  
     unsigned int offsetBits = 0; // off set vai ser log(tamanhoLinha_) na base 2
     unsigned int tmp = static_cast<unsigned int>(tamanhoLinha_); // tmp --> tamnho da linha
-    while (tmp > 1) { tmp >>= 1; ++offsetBits; } // dividindo tmp 2 e movimentando os bits para a direita
+    while (tmp > 1) { tmp >>= 1; ++offsetBits; } // dividindo tmp 2 --> movimentando os bits para a direita
 
     unsigned int conjuntoBits = 0; // tbm é log na base 2
     tmp = static_cast<unsigned int>(tamanhoConjuntoAssociativo_);
     while (tmp > 1) { tmp >>= 1; ++conjuntoBits; }
-
-      // [ TAG ............... ][ CONJUNTO ][ OFFSET ]
-      //     resto               3 bits    4 bits
+        //       resto               3 bits    4 bits
+        // [ TAG ............... ][ CONJUNTO ][ OFFSET ]
+        //    qual bloco           conj. linha  byte dentro da linha
 
     
+    
+        // mascara de bits --> extraindo o campo off set do endereco
     unsigned int offsetMask = (offsetBits == 0) ? 0u : ((1u << offsetBits) - 1u);
+        // mascara tbm --> extraindo conjunto
     unsigned int conjuntoMask = (conjuntoBits == 0) ? 0u : ((1u << conjuntoBits) - 1u);
+
+        // isolando o offset 
     offset = endereco & offsetMask;
+
+        // isolando o offset --> retirando os bits menos significativos 
     conjunto = (offsetBits == 0) ? 0u : ((endereco >> offsetBits) & conjuntoMask);
+
+        // sobrou a tag 
     tag = endereco >> (offsetBits + conjuntoBits);
 }
