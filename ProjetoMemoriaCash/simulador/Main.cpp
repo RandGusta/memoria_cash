@@ -1,17 +1,44 @@
 #include "MemoriaPrincipal.h"
+#include "Cache.h"
 #include <iostream>
 using namespace std;
 
 int main() {
-    MemoriaPrincipal ram("RAM", 100);
+    // Criar a memória principal (último nível)
+    MemoriaPrincipal memoriaPrincipal("RAM", 50);
 
-    ram.escrever(10, 42);
-    ram.escrever(20, 99);
+    // Criar a cache L1 (primeiro nível)
+    Cache cacheL1("L1", 
+                  2,                 // latência
+                  2,                 // associatividade
+                  32,                // tamanho da linha (fixo)
+                  4,                 // número de conjuntos
+                  WRITE_BACK,        // política de escrita
+                  &memoriaPrincipal  // ponteiro para o próximo nível
+    );
 
-    cout << "Endereco 10 = " << ram.ler(10) << endl; 
-    cout << "Endereco 20 = " << ram.ler(20) << endl;
-    cout << "Endereco 30 (nao escrito) = " << ram.ler(30) << endl;
+    std::cout << "===== TESTE DE CACHE =====" << std::endl;
 
-    ram.imprimirEstatistica();
+    // Simular algumas leituras
+    std::cout << "\nLendo endereço 100 (esperado: MISS)" << std::endl;
+    int tempo1 = cacheL1.ler(100);
+    std::cout << "Tempo total: " << tempo1 << " ciclos\n";
+
+    std::cout << "\nLendo endereço 100 novamente (esperado: HIT)" << std::endl;
+    int tempo2 = cacheL1.ler(100);
+    std::cout << "Tempo total: " << tempo2 << " ciclos\n";
+
+    // Simular escrita (WRITE-BACK: marca linha como suja)
+    std::cout << "\nEscrevendo no endereço 100 (esperado: HIT e suja=true)" << std::endl;
+    cacheL1.escrever(100);
+
+    // Escrever em outro endereço (para forçar substituição)
+    std::cout << "\nEscrevendo no endereço 200 (pode gerar substituição dependendo do conjunto)" << std::endl;
+    cacheL1.escrever(200);
+
+    // Estatísticas finais
+    std::cout << "\n===== ESTATÍSTICAS =====" << std::endl;
+    cacheL1.imprimirEstatistica();
+
     return 0;
 }
