@@ -100,7 +100,7 @@ bool Cache::buscarNaCache(unsigned int endereco, LinhaCache*& linhaCache) {
 
 
 // tentando buscar o endereço anterior para o metodo inserirNaCache
-unsigned int Cache::(unsigned int tag, unsigned int conjunto){
+unsigned int Cache::reconstruirEndereco(unsigned int tag, unsigned int conjunto){
      unsigned int offsetBits = 0;
     unsigned int tmp = static_cast<unsigned int>(tamanhoLinha_);
     while (tmp > 1) { tmp >>= 1; ++offsetBits; }
