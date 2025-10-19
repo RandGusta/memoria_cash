@@ -21,7 +21,7 @@ void MemoriaPrincipal::escrever(unsigned int endereco) {
 void MemoriaPrincipal::imprimirEstatistica() {
     std::cout << "MemoriaPrincipal" "("<<nome_<<"):\n";
     std::cout << "Leituras: "<< leitura_ << "\n";
-    std::cout << "Escritas: "<< escrita_<< "\n";
+    std::cout << "Escritas: "<< escrita_<< "\n\n";
 }
 
 
