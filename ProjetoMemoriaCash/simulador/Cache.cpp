@@ -182,14 +182,14 @@ void Cache::pegarCampoEndereco(unsigned int endereco,
  
     // calculando o numero de bits do offsetmsa
     unsigned int offsetBits = 0; // off set vai ser log(tamanhoLinha_) na base 2
-    unsigned int tmp = static_cast<unsigned int>(tamanhoLinha_); // tmp --> tamnho da linha
-    while (tmp > 1) { tmp >>= 1; ++offsetBits; } // dividindo tmp 2 --> movimentando os bits para a direita
+    unsigned int auxiliar = static_cast<unsigned int>(tamanhoLinha_); // auxiliar --> tamnho da linha
+    while (auxiliar > 1) { auxiliar >>= 1; ++offsetBits; } // dividindo auxiliar 2 --> movimentando os bits para a direita
 
 
     // calculando o numero de bits do indice do conjunto
     unsigned int conjuntoBits = 0; // tbm é log na base 2
-    tmp = static_cast<unsigned int>(tamanhoConjuntoAssociativo_);
-    while (tmp > 1) { tmp >>= 1; ++conjuntoBits; }
+    auxiliar = static_cast<unsigned int>(tamanhoConjuntoAssociativo_);
+    while (auxiliar > 1) { auxiliar >>= 1; ++conjuntoBits; }
         //       resto               3 bits    4 bits
         // [ TAG ............... ][ CONJUNTO ][ OFFSET ]
         //    qual bloco           conj. linha  byte dentro da linha
@@ -217,13 +217,13 @@ void Cache::pegarCampoEndereco(unsigned int endereco,
 // tentando buscar o endereço anterior para o metodo inserirNaCache
 unsigned int Cache::reconstruirEndereco(unsigned int tag, unsigned int conjunto){
     unsigned int offsetBits = 0;
-    unsigned int tmp = static_cast<unsigned int>(tamanhoLinha_);
-    while (tmp > 1) { tmp >>= 1; ++offsetBits; }
+    unsigned int auxiliar = static_cast<unsigned int>(tamanhoLinha_);
+    while (auxiliar > 1) { auxiliar >>= 1; ++offsetBits; }
 
 
     unsigned int conjuntoBits = 0;
-    tmp = static_cast<unsigned int>(tamanhoConjuntoAssociativo_);
-    while (tmp > 1) { tmp >>= 1; ++conjuntoBits; }
+    auxiliar = static_cast<unsigned int>(tamanhoConjuntoAssociativo_);
+    while (auxiliar > 1) { auxiliar >>= 1; ++conjuntoBits; }
 
 
     // forrmula da reconstrução:

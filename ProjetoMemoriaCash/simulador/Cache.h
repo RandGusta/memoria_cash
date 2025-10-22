@@ -31,9 +31,9 @@ public:
     void imprimirEstatistica() override;
 
 private:
-    int associatividade_;
-    int tamanhoLinha_;
-    int tamanhoConjuntoAssociativo_;
+    int associatividade_; // quantidade de linhas por conjunto 
+    int tamanhoLinha_; // tamanho de byte das linhas 
+    int tamanhoConjuntoAssociativo_; // quantidade de conjuntos na cache
     PoliticaDeEscrita politicaDeEscrita_;
     Memoria* proximoNivel_; // para guardar um endereço de um objeto do tipo memória ou que herde de memória
 
